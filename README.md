@@ -12,7 +12,7 @@ Manual testing was used to explore the application, validate expected behaviour,
 
 A focused automated regression suite was then implemented using **Python, pytest, and Playwright** to verify selected high-value application behaviours and reproduce important defects identified during manual testing.
 
-The testing covers:
+Testing covers:
 
 - Creating new job requests
 - Required-field validation
@@ -30,7 +30,7 @@ The testing covers:
 
 ---
 
-## Testing Approach
+# Testing Approach
 
 Testing was performed using a **risk-based approach**, with higher-risk functionality tested before lower-impact usability issues.
 
@@ -51,9 +51,9 @@ Automation was then used for selected high-value and repeatable checks rather th
 
 ---
 
-## Test Environment
+# Test Environment
 
-### Manual Testing Environment
+## Manual Testing Environment
 
 - **Operating System:** Windows
 - **Browser:** Google Chrome
@@ -64,7 +64,7 @@ Automation was then used for selected high-value and repeatable checks rather th
 - **Mobile Viewport:** 393 × 852
 - **Application Type:** Local HTML application
 
-### Automation Environment
+## Automation Environment
 
 - **Language:** Python 3.14.2
 - **Test Framework:** pytest 9.1.1
@@ -300,16 +300,16 @@ The functionality remains accessible, but the layout provides a poor mobile user
 
 ## Defect Summary
 
-| Bug ID | Description | Severity |
-|---|---|---|
-| BUG-001 | Total Budget does not equal the sum of displayed job budgets | High |
-| BUG-002 | Client Name validation message contains a spelling error | Low |
-| BUG-003 | Negative budget values are accepted | High |
-| BUG-004 | Completed jobs are counted and displayed as overdue | Medium |
-| BUG-005 | Job result count does not update after filtering | Medium |
-| BUG-006 | Search is case-sensitive | Medium |
-| BUG-007 | Clear Filters does not clear Search | Medium |
-| BUG-008 | Poor responsiveness on phone-sized screens | Medium |
+| Bug ID | Description | Severity | Automation |
+|---|---|---|---|
+| BUG-001 | Total Budget does not equal the sum of displayed job budgets | High | Reproduced by AT-003 |
+| BUG-002 | Client Name validation message contains a spelling error | Low | Reproduced by AT-002 |
+| BUG-003 | Negative budget values are accepted | High | Manual |
+| BUG-004 | Completed jobs are counted and displayed as overdue | Medium | Manual |
+| BUG-005 | Job result count does not update after filtering | Medium | Manual |
+| BUG-006 | Search is case-sensitive | Medium | Manual |
+| BUG-007 | Clear Filters does not clear Search | Medium | Manual |
+| BUG-008 | Poor responsiveness on phone-sized screens | Medium | Manual |
 
 ---
 
@@ -328,7 +328,7 @@ The objective was not to automate every manual test case.
 
 Instead, automation focuses on a small number of important, repeatable behaviours that provide meaningful regression coverage.
 
-The main automated tests are located in:
+The automated tests are located in:
 
 `Automation/tests/test_job_tracker.py`
 
@@ -381,6 +381,10 @@ The request should be saved and displayed in the jobs table.
 
 **PASS**
 
+### Evidence
+
+`Evidence/AT-001-create-valid-job-pass.png`
+
 ---
 
 ## AT-002 - Required Client Name Validation
@@ -417,9 +421,13 @@ The application displays:
 
 **FAIL - Known defect BUG-002**
 
-The automation correctly reproduces the validation-message spelling defect identified during manual testing.
+The application correctly prevents the incomplete request from being submitted, but the validation message contains a spelling error.
 
-The automated test intentionally continues to expect the correct spelling rather than accepting the defective text.
+The automated test intentionally continues to assert the correct expected behaviour instead of accepting the defective text.
+
+### Evidence
+
+`Evidence/AT-002-client-validation-fail.png`
 
 ---
 
@@ -431,9 +439,9 @@ Verify that the Total Budget displayed by the application equals the sum of the 
 
 ### Automated Approach
 
-The test does not hard-code R100,300 as the expected result.
+The test does not hard-code **R100,300** as the expected result.
 
-Instead, Playwright reads the Budget value from every job row.
+Instead, Playwright reads the Budget value from every displayed job row.
 
 Python then converts the displayed budget values into numbers and calculates the total independently.
 
@@ -451,23 +459,21 @@ The displayed Total Budget should equal the calculated sum of all job budgets.
 
 ### Actual Result
 
-Displayed Total Budget:
+**Displayed Total Budget:** R87,800
 
-**R87,800**
+**Calculated Total Budget:** R100,300
 
-Calculated Total Budget:
-
-**R100,300**
-
-Difference:
-
-**R12,500**
+**Difference:** R12,500
 
 ### Current Result
 
 **FAIL - Known defect BUG-001**
 
 This automated test independently reproduces the Total Budget defect identified during manual testing.
+
+### Evidence
+
+`Evidence/AT-003-total-budget-fail.png`
 
 ---
 
@@ -480,7 +486,7 @@ This automated test independently reproduces the Total Budget defect identified 
 | AT-002 | Required Client Name validation | FAIL | BUG-002 |
 | AT-003 | Total Budget calculation | FAIL | BUG-001 |
 
-The current full automated test run therefore produces:
+The current complete automated test suite therefore contains **4 checks**:
 
 - **2 Passed**
 - **2 Failed**
@@ -488,6 +494,23 @@ The current full automated test run therefore produces:
 The two failing tests represent known application defects rather than failures in the automation framework.
 
 The tests intentionally continue to assert the correct expected behaviour so that they can become passing regression tests once the application defects are fixed.
+
+---
+
+## Automated Test Evidence
+
+Evidence from the Playwright automated test execution is stored in the `Evidence/` directory.
+
+| Automated Test | Result | Related Defect | Evidence |
+|---|---|---|---|
+| AT-001 - Create valid job request | PASS | None | `Evidence/AT-001-create-valid-job-pass.png` |
+| AT-002 - Client Name validation | FAIL | BUG-002 | `Evidence/AT-002-client-validation-fail.png` |
+| AT-003 - Total Budget calculation | FAIL | BUG-001 | `Evidence/AT-003-total-budget-fail.png` |
+
+AT-002 and AT-003 intentionally assert the expected correct behaviour of the application. Their failures reproduce defects identified during manual testing rather than failures in the automation framework.
+
+- **AT-002 / BUG-002:** The application prevents submission when the Client Name is empty, but displays `Client name is requred.` instead of `Client name is required.`
+- **AT-003 / BUG-001:** The application displays a Total Budget of `R87,800`, while the automated test calculates `R100,300` from the individual job budgets.
 
 ---
 
@@ -563,8 +586,6 @@ If PowerShell blocks activation for the current session, the execution policy ca
 python -m pip install -r requirements.txt
 ```
 
-The dependency file includes the packages required by the automation suite.
-
 ---
 
 ## 5. Install Chromium
@@ -638,6 +659,9 @@ job-request-tracker-qaproject/
 |   `-- bug-report.md
 |
 |-- Evidence/
+|   |-- AT-001-create-valid-job-pass.png
+|   |-- AT-002-client-validation-fail.png
+|   |-- AT-003-total-budget-fail.png
 |   |-- BUG-001-after.png
 |   |-- BUG-001-before.png
 |   |-- BUG-002-client-name-validation.png
@@ -731,9 +755,9 @@ Contains detailed defect reports including:
 
 ## Evidence
 
-The `Evidence` directory contains screenshots captured during manual testing to support the documented findings.
+The `Evidence` directory contains screenshots captured during **manual and automated testing** to support the documented findings and test results.
 
-Evidence is provided for defects including:
+Manual evidence is provided for findings including:
 
 - Incorrect Total Budget
 - Client Name validation spelling
@@ -743,6 +767,32 @@ Evidence is provided for defects including:
 - Case-sensitive search
 - Clear Filters behaviour
 - Mobile responsiveness
+
+Automated execution evidence is provided for:
+
+- AT-001 - Successful valid job creation
+- AT-002 - Client Name validation defect reproduction
+- AT-003 - Total Budget defect reproduction
+
+---
+
+# Test Traceability Summary
+
+The project maintains traceability between manual testing, identified defects, automated regression checks, and supporting evidence.
+
+| Area | Manual Testing | Defect | Automated Coverage | Evidence |
+|---|---|---|---|---|
+| Valid job creation | Covered | None | AT-001 | AT-001 screenshot |
+| Client Name validation | Covered | BUG-002 | AT-002 | Manual + AT-002 screenshots |
+| Total Budget calculation | Covered | BUG-001 | AT-003 | Manual + AT-003 screenshots |
+| Negative Budget | Covered | BUG-003 | Not automated | Manual evidence |
+| Overdue completed jobs | Covered | BUG-004 | Not automated | Manual evidence |
+| Result count | Covered | BUG-005 | Not automated | Manual evidence |
+| Case-sensitive search | Covered | BUG-006 | Not automated | Manual evidence |
+| Clear Filters | Covered | BUG-007 | Not automated | Manual evidence |
+| Mobile responsiveness | Covered | BUG-008 | Not automated | Manual evidence |
+
+The automated suite intentionally focuses on selected high-value regression scenarios rather than duplicating the complete manual test suite.
 
 ---
 
@@ -758,9 +808,9 @@ Evidence is provided for defects including:
 - Exploratory testing
 - Desktop testing
 - Mobile/responsive testing
-- 17 documented manual test cases
-- 8 documented defects
-- Screenshot evidence
+- **17 documented manual test cases**
+- **8 documented defects**
+- Manual screenshot evidence
 - Python automation environment
 - pytest setup
 - Playwright setup
@@ -769,9 +819,11 @@ Evidence is provided for defects including:
 - AT-001 valid request automation
 - AT-002 validation automation
 - AT-003 Total Budget automation
+- Automated execution evidence
 - Automation dependency management
 - Automation execution documentation
 - Manual and automated QA documentation
+- Test-to-defect traceability
 
 ---
 
@@ -794,6 +846,37 @@ The supplied challenge PDFs and HTML application are excluded through `.gitignor
 
 ---
 
+# Release Assessment
+
+Based on the testing performed, the application should **not be considered release-ready without review of the identified defects**.
+
+The highest-priority findings are:
+
+### High Severity
+
+- **BUG-001 - Incorrect Total Budget**
+- **BUG-003 - Negative budget values are accepted**
+
+These defects affect financial-data accuracy and integrity and should be addressed before release.
+
+### Medium Severity
+
+- BUG-004 - Completed jobs counted as overdue
+- BUG-005 - Incorrect filtered result count
+- BUG-006 - Case-sensitive search
+- BUG-007 - Clear Filters does not clear Search
+- BUG-008 - Poor mobile responsiveness
+
+These should be reviewed and prioritised according to confirmed product requirements.
+
+### Low Severity
+
+- BUG-002 - Client Name validation spelling error
+
+Although this does not prevent the validation functionality from working, the user-facing text should be corrected.
+
+---
+
 # Overall QA Conclusion
 
 The Job Request Tracker's core functionality is usable, including creating requests, required-field validation, searching, status filtering, and displaying job information.
@@ -809,10 +892,17 @@ A focused automated regression suite was subsequently implemented using **Python
 
 **AT-001** confirms that a valid job request can be created successfully.
 
-**AT-002** automatically reproduces the Client Name validation spelling defect documented as BUG-002.
+**AT-002** automatically reproduces the Client Name validation spelling defect documented as **BUG-002**.
 
-**AT-003** independently reads and calculates the displayed job budgets and reproduces BUG-001 by demonstrating that the jobs total **R100,300** while the application displays **R87,800**.
+**AT-003** independently reads and calculates the displayed job budgets and reproduces **BUG-001** by demonstrating that the jobs total **R100,300** while the application displays **R87,800**.
+
+The automation currently contains four checks when the setup smoke test is included:
+
+- **2 passing**
+- **2 failing because of known application defects**
 
 The combination of manual exploratory testing and targeted browser automation provides broad behavioural coverage together with repeatable regression checks for important application functionality.
 
 Based on the testing performed, the **high-severity financial defects should be addressed before release**. The medium-severity filtering, search, overdue-status, and responsive-design issues should then be reviewed according to product priorities.
+
+Once the identified defects are corrected, the affected manual tests and automated regression tests should be rerun to verify the fixes and check for regressions.
