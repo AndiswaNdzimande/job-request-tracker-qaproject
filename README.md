@@ -6,7 +6,7 @@ This repository contains my Quality Assurance testing work for the **Job Request
 
 The objective of this project is to evaluate the supplied Job Request Tracker application before release by identifying functional, validation, calculation, usability, and responsive-design issues that could affect users.
 
-The project includes both **manual QA testing** and **automated browser testing**.
+The project includes both **manual QA testing** and **automated browser testing**, and concludes with a final **Test Summary Report** containing a risk assessment and release recommendation.
 
 Manual testing was used to explore the application, validate expected behaviour, identify defects, test edge cases, and capture supporting evidence.
 
@@ -648,6 +648,8 @@ Findings based on assumptions may require confirmation from the product owner be
 
 ---
 
+---
+
 # Project Structure
 
 ```text
@@ -656,7 +658,8 @@ job-request-tracker-qaproject/
 |-- Docs/
 |   |-- test-plan.md
 |   |-- test-cases.md
-|   `-- bug-report.md
+|   |-- bug-report.md
+|   `-- test-summary-report.md
 |
 |-- Evidence/
 |   |-- AT-001-create-valid-job-pass.png
@@ -700,11 +703,13 @@ The supplied challenge HTML and PDF materials are also excluded.
 
 # QA Documentation
 
+The repository contains four primary QA documents together with supporting test evidence.
+
 ## Test Plan
 
 `Docs/test-plan.md`
 
-Contains:
+Defines the overall QA strategy and contains:
 
 - Testing objectives
 - Scope
@@ -722,7 +727,7 @@ Contains:
 
 `Docs/test-cases.md`
 
-Contains the detailed manual test cases including:
+Contains the **17 documented manual test cases**, including:
 
 - Test ID
 - Priority
@@ -740,7 +745,7 @@ Contains the detailed manual test cases including:
 
 `Docs/bug-report.md`
 
-Contains detailed defect reports including:
+Contains the **8 documented defects**, including:
 
 - Bug ID
 - Severity
@@ -750,6 +755,37 @@ Contains detailed defect reports including:
 - Actual result
 - Severity reasoning
 - Supporting evidence
+
+---
+
+## Test Summary Report
+
+`Docs/test-summary-report.md`
+
+Provides the final consolidated QA assessment for the project.
+
+The report contains:
+
+- Executive summary
+- Testing objectives
+- Test scope
+- Test approach
+- Test environment
+- Manual test execution summary
+- Defect summary
+- High-, Medium-, and Low-severity findings
+- Automated testing summary
+- Automated test results
+- Manual and automated evidence references
+- Test traceability
+- QA assumptions
+- Testing limitations
+- Risk assessment
+- Release recommendation
+- Retesting recommendations
+- Final QA conclusion
+
+The Test Summary Report brings together the results of the complete manual and automated testing process and provides the final release assessment for the Job Request Tracker.
 
 ---
 
@@ -796,6 +832,8 @@ The automated suite intentionally focuses on selected high-value regression scen
 
 ---
 
+---
+
 # Current Project Status
 
 ## Completed
@@ -824,6 +862,17 @@ The automated suite intentionally focuses on selected high-value regression scen
 - Automation execution documentation
 - Manual and automated QA documentation
 - Test-to-defect traceability
+- Final QA Test Summary Report
+- Risk assessment
+- Release recommendation
+- Retesting recommendations
+- Final repository audit
+
+## Final Status
+
+The planned QA work for this challenge is **complete**.
+
+The repository contains the manual testing documentation, defect reports, supporting evidence, automated regression tests, automation dependencies, final Test Summary Report, and overall release assessment.
 
 ---
 
@@ -835,29 +884,45 @@ The supplied application is treated as confidential test material and is kept ou
 
 The repository contains only the QA work created for the challenge, including:
 
-- Test documentation
-- Defect reports
-- Test evidence
-- Automated test code
+- Test Plan
+- 17 manual test cases
+- 8 documented defect reports
+- Manual test evidence
+- Automated test evidence
+- Python/Playwright automated test code
 - Automation dependencies
-- Project documentation
+- Final QA Test Summary Report
+- Project README and supporting QA documentation
 
 The supplied challenge PDFs and HTML application are excluded through `.gitignore`.
 
+This keeps confidential challenge material separate from the QA deliverables while still allowing authorised testers with a local copy of `Job_traker.html` to execute the automated test suite.
+
 ---
 
-# Release Assessment
+# Final Release Recommendation
 
-Based on the testing performed, the application should **not be considered release-ready without review of the identified defects**.
+**NOT READY FOR RELEASE**
 
-The highest-priority findings are:
+The application should not be released until the High-severity financial defects have been corrected and successfully retested.
+
+At minimum:
+
+1. **BUG-001** should be fixed so that Total Budget accurately reflects the underlying job budgets.
+2. **BUG-003** should be fixed so that invalid negative budget values cannot be saved.
+3. The affected manual test cases should be rerun.
+4. The complete automated regression suite should be rerun.
+5. AT-002 and AT-003 should be reviewed after their corresponding defects are fixed.
+6. Medium-severity findings should be reviewed against confirmed product requirements before release.
+
+## Findings by Severity
 
 ### High Severity
 
 - **BUG-001 - Incorrect Total Budget**
 - **BUG-003 - Negative budget values are accepted**
 
-These defects affect financial-data accuracy and integrity and should be addressed before release.
+These defects affect financial-data accuracy and integrity and must be addressed before release.
 
 ### Medium Severity
 
@@ -874,6 +939,12 @@ These should be reviewed and prioritised according to confirmed product requirem
 - BUG-002 - Client Name validation spelling error
 
 Although this does not prevent the validation functionality from working, the user-facing text should be corrected.
+
+The complete final QA assessment is available in:
+
+[`Docs/test-summary-report.md`](Docs/test-summary-report.md)
+
+The complete testing lifecycle and final assessment are documented across `Docs/test-plan.md`, `Docs/test-cases.md`, `Docs/bug-report.md`, and `Docs/test-summary-report.md`. Together with the evidence and automated regression suite, these deliverables provide traceability from test planning and execution through defect identification, automation, risk assessment, and the final release recommendation.
 
 ---
 
@@ -903,6 +974,6 @@ The automation currently contains four checks when the setup smoke test is inclu
 
 The combination of manual exploratory testing and targeted browser automation provides broad behavioural coverage together with repeatable regression checks for important application functionality.
 
-Based on the testing performed, the **high-severity financial defects should be addressed before release**. The medium-severity filtering, search, overdue-status, and responsive-design issues should then be reviewed according to product priorities.
+Based on the testing performed, the application is **not ready for release**. The **high-severity financial defects must be addressed and retested before release**. The medium-severity filtering, search, overdue-status, and responsive-design issues should then be reviewed according to product priorities.
 
 Once the identified defects are corrected, the affected manual tests and automated regression tests should be rerun to verify the fixes and check for regressions.
