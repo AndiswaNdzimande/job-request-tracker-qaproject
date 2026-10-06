@@ -1,0 +1,19 @@
+# Two Tone supplied challenge materials
+Job_traker.html
+job-tracker-demo.html
+*.pdf
+
+# Dependencies
+node_modules/
+
+# Playwright output
+playwright-report/
+test-results/
+
+# Environment files
+.env
+.env.*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
