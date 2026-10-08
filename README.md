@@ -397,7 +397,7 @@ job-request-tracker-qaproject/
 |   |-- BUG-014-decimal-budget.png
 |   |-- BUG-015-long-name.png
 |   |-- BUG-016-five-digit-year.png
-|   `-- Job-title-is-required.png
+|   
 |
 |-- Automation/
 |   |-- conftest.py
