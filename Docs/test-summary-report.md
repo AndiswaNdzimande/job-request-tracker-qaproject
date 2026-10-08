@@ -1,3 +1,4 @@
+
 # Job Request Tracker - QA Test Summary Report
 
 ## 1. Document Information
@@ -6,36 +7,40 @@
 **Document:** QA Test Summary Report  
 **Testing Type:** Manual and Automated QA Testing  
 **Automation Tools:** Python, pytest and Playwright  
-**Status:** Testing Completed
+**Tester:** Andiswa Ndzimande  
+**Test dates:** first session on or before 6 October 2026; second control-by-control session on 8 October 2026  
+**Status:** ✅ Testing Completed
 
 ---
 
 # 2. Executive Summary
 
-Quality Assurance testing was performed on the supplied **Job Request Tracker** application to evaluate its functionality, validation, calculations, search and filtering behaviour, usability, and mobile responsiveness.
+Quality Assurance testing was performed on the supplied **Job Request Tracker** application to evaluate its functionality, validation, calculations, search and filtering behaviour, input handling, usability, and mobile responsiveness.
 
 The testing process combined **manual testing** with a focused **automated regression suite**.
 
-A total of **17 manual test cases** were executed.
+A total of **42 manual test cases** were executed (✅ 12 PASS, ⚠️ 10 PASS with known issue, ❌ 20 FAIL).
 
-Testing identified **8 documented defects**:
+Testing identified **16 documented defects**:
 
-- 2 High-severity defects
-- 5 Medium-severity defects
-- 1 Low-severity defect
+- 4 High-severity defects
+- 8 Medium-severity defects
+- 4 Low-severity defects
 
-The most significant findings relate to financial-data integrity. The application displays an incorrect Total Budget and also allows negative budget values to be saved.
+Two further items were recorded as observations for the product owner (OBS-01 past due dates accepted, OBS-02 no edit or delete) and are not counted as defects.
 
-Following manual testing, selected high-value scenarios were automated using **Python, pytest and Playwright**.
+The most significant findings relate to **financial-data integrity and data quality**: the application displays an incorrect Total Budget (the newest job is always left out), accepts negative budgets, creates duplicate jobs when Save is clicked twice, and displays HTML typed into text fields as page content (a security risk).
 
-The automation suite includes a smoke/setup check and three targeted automated tests.
+A second testing session applied a control-by-control checklist to every control on the page. It found eight further defects (BUG-009 to BUG-016), including a status filter option that never works ("Done"), and strengthened the earlier findings with additional examples.
 
-Current automation results are:
+Following manual testing, three important defects were automated using **Python, pytest and Playwright**: two High-severity defects (BUG-001 incorrect Total Budget and BUG-003 negative budget accepted) and one Medium-severity defect (BUG-009 the "Done" status filter shows no jobs). Each automated test asserts the **correct** behaviour and is marked as an expected failure (`xfail`) with its bug ID, so the suite runs cleanly while still tracking the defects. Current automation results:
 
-- 2 Passed
-- 2 Failed because of known application defects
+- 3 expected failures (XFAIL), each reproducing a known application defect
+- 0 unexpected failures or errors
 
-Based on the testing performed, the application should **not be considered release-ready until the high-severity financial defects have been addressed and successfully retested**.
+Running the suite with `--runxfail` shows the real failure message of each test.
+
+Based on the testing performed, the application should **not be considered release-ready until the High-severity defects have been addressed and successfully retested**.
 
 ---
 
@@ -75,7 +80,10 @@ The following areas were included in testing:
 - Required Due Date validation
 - Required Budget validation
 - Negative budget values
-- Zero-value budget boundary testing
+- Zero-value, decimal and very large budget testing
+- Special characters, HTML-like text and very long text in text fields
+- Duplicate submission (double-click Save) and Cancel while saving
+- Due date handling: past date, today, and a 5-digit year
 - Cancelling a request
 - Creating requests with different statuses
 
@@ -86,14 +94,16 @@ The following areas were included in testing:
 - Total Budget
 - Job table information
 - Completed-job overdue behaviour
+- "Showing N jobs" line
 
 ### Search and Filtering
 
 - Search by Client Name
 - Search by Job Title
 - Search using different letter casing
-- Status filtering
-- Clear Filters
+- Status filtering (every option: Pending, In progress, Done)
+- Search and status filter used together
+- Clear Filters (after a status filter and after a search)
 - Filtered result counts
 
 ### Responsive Behaviour
@@ -105,10 +115,9 @@ The following areas were included in testing:
 
 ### Automation
 
-- Application smoke test
-- Valid request creation
-- Client Name required validation
-- Total Budget calculation
+- Total Budget equals the sum of the jobs (BUG-001)
+- Negative budget is rejected (BUG-003)
+- "Done" status filter lists the Done jobs (BUG-009)
 
 ---
 
@@ -160,19 +169,25 @@ Automation was then introduced for selected scenarios that were important, repea
 
 # 7. Manual Test Execution Summary
 
-A total of **17 manual test cases** were executed.
+A total of **42 manual test cases** were executed:
+
+| Result | Count |
+|---|---|
+| ✅ PASS | 12 |
+| ⚠️ PASS with known issue | 10 |
+| ❌ FAIL | 20 |
+
+("PASS with known issue" means the feature under test behaves correctly and the only difference from the expected result is a problem already logged under another bug, for example the wrong "Showing N jobs" line.)
 
 The test cases covered:
 
 - Core job-request creation
-- Form validation
-- Budget validation
-- Calculation behaviour
-- Overdue-job handling
-- Search
-- Filtering
-- Result counts
-- Clear Filters behaviour
+- Form validation (empty, spaces only, negative, zero, decimal, very large)
+- Special characters, HTML-like text and very long text
+- Calculation behaviour (Total budget after adding jobs)
+- Overdue-job handling, including today's date and Done jobs
+- Duplicate submission and Cancel while saving
+- Search (casing, partial text, no match), every status filter option, Clear Filters
 - Responsive design
 
 Detailed test steps, expected results, actual results, and test outcomes are documented in:
@@ -187,18 +202,28 @@ Supporting screenshots are stored in:
 
 # 8. Defect Summary
 
-Testing identified **8 documented defects**.
+Testing identified **16 documented defects** (4 High, 8 Medium, 4 Low).
 
 | Bug ID | Defect | Severity | Automation |
 |---|---|---|---|
-| BUG-001 | Total Budget does not equal the sum of displayed job budgets | High | AT-003 |
-| BUG-002 | Client Name validation message contains a spelling error | Low | AT-002 |
-| BUG-003 | Negative budget values are accepted | High | Manual |
-| BUG-004 | Completed jobs are counted and displayed as overdue | Medium | Manual |
-| BUG-005 | Job result count does not update after filtering | Medium | Manual |
-| BUG-006 | Search is case-sensitive | Medium | Manual |
-| BUG-007 | Clear Filters does not clear Search | Medium | Manual |
-| BUG-008 | Poor mobile responsiveness | Medium | Manual |
+| BUG-001 | Total Budget does not equal the sum of the job budgets (the newest job is left out) | 🔴 High | AT-001 |
+| BUG-002 | Client name validation message contains a spelling error ("requred") | 🟡 Low | Manual |
+| BUG-003 | New request form accepts a negative budget | 🔴 High | AT-002 |
+| BUG-004 | Completed (Done) jobs are counted and shown as overdue | 🟠 Medium | Manual |
+| BUG-005 | "Showing N jobs" line does not change when a search or filter is used | 🟠 Medium | Manual |
+| BUG-006 | Search is case-sensitive (Client name and Job title) | 🟠 Medium | Manual |
+| BUG-007 | Clear filters does not clear the Search box | 🟠 Medium | Manual |
+| BUG-008 | Page does not fit a phone-sized screen | 🟠 Medium | Manual |
+| BUG-009 | "Done" status filter always shows no jobs | 🟠 Medium | AT-003 |
+| BUG-010 | Clicking Save twice creates duplicate jobs | 🔴 High | Manual |
+| BUG-011 | Cancel clicked while saving still adds the job | 🟠 Medium | Manual |
+| BUG-012 | HTML tags typed in Client name and Job title are interpreted instead of shown as text | 🔴 High | Manual |
+| BUG-013 | A budget of 0 is accepted | 🟡 Low | Manual |
+| BUG-014 | Decimal budgets are shown with one decimal place (R1 500,5) | 🟡 Low | Manual |
+| BUG-015 | Client name has no length limit and a very long name stretches the layout | 🟡 Low | Manual |
+| BUG-016 | A due date with a 5-digit year (e.g. 20206) is treated as overdue | 🟠 Medium | Manual |
+
+Two observations are recorded separately: OBS-01 (new requests can be saved with a past or unrealistic due date) and OBS-02 (no way to edit or delete a job).
 
 Detailed reproduction steps and evidence references are documented in:
 
@@ -206,23 +231,11 @@ Detailed reproduction steps and evidence references are documented in:
 
 ---
 
-# 9. High-Severity Findings
+# 9. 🔴 High-Severity Findings
 
 ## BUG-001 - Incorrect Total Budget
 
-The application displays:
-
-**R87,800**
-
-However, the budgets of the 10 displayed jobs add up to:
-
-**R100,300**
-
-This creates a difference of:
-
-**R12,500**
-
-The issue affects financial-data accuracy and was reproduced independently by automated test **AT-003**.
+The application displays **R87 800**, while the 10 original jobs add up to **R100 300**, a difference of **R12 500**. R12 500 is exactly the budget of the last job in the list. When a new job is added, the new job is the one left out (adding R1 000 shows R100 300 instead of R101 300). The error was reproduced with five different new jobs and by automated test **AT-001**.
 
 ### Risk
 
@@ -230,21 +243,13 @@ Users may make decisions using an incorrect representation of the total value of
 
 ### Recommendation
 
-The Total Budget calculation should be corrected and regression tested before release.
+The Total Budget calculation should be corrected (it appears to skip the final row) and regression tested before release.
 
 ---
 
 ## BUG-003 - Negative Budget Values Are Accepted
 
-The application allows a negative budget such as:
-
-`-5000`
-
-to be saved.
-
-The application then displays the value as:
-
-`R-5 000`
+The application allows a negative budget such as `-5000` to be saved and displays it as `R-5 000`.
 
 ### Risk
 
@@ -252,139 +257,162 @@ Allowing invalid negative financial values can compromise the accuracy and integ
 
 ### Recommendation
 
-Budget validation should prevent negative values from being submitted.
-
-The expected handling of a zero-value budget should also be confirmed with the product owner.
+Budget validation should prevent negative values from being submitted (reproduced by automated test **AT-002**). The handling of a zero-value budget (BUG-013) should also be confirmed with the product owner.
 
 ---
 
-# 10. Medium-Severity Findings
+## BUG-010 - Clicking Save Twice Creates Duplicate Jobs
 
-Five Medium-severity findings were documented:
+Two quick clicks on **Save request** created two identical jobs (12 rows instead of 11, Open jobs 10 instead of 9). The Total budget also rose by the duplicate's budget.
 
-- **BUG-004:** Completed jobs are counted and displayed as overdue.
-- **BUG-005:** The displayed result count does not update after filtering.
-- **BUG-006:** Search is case-sensitive.
-- **BUG-007:** Clear Filters does not clear the Search field.
-- **BUG-008:** The application is poorly responsive on a phone-sized viewport.
+### Risk
+
+One accidental double-click creates a duplicate record that inflates the counts and totals. The application has no Delete button, so the user cannot remove the duplicate; reloading the page also discards every other new request.
+
+### Recommendation
+
+Disable the Save button as soon as it is clicked (or ignore repeat clicks) and show a clear saving state. Consider adding Edit and Delete features (OBS-02).
+
+---
+
+## BUG-012 - HTML Typed in Text Fields Is Interpreted as Page Content
+
+`<b>Test</b>` in Client name and `<i>Test</i>` in Job title were displayed as **bold** and *italic* text instead of the characters typed.
+
+### Risk
+
+This is a recognised security weakness (cross-site scripting): a malicious entry could run code for anyone who opens the tracker.
+
+### Recommendation
+
+Display all user-typed text as plain text (escape it) before showing it in the table, and retest with special characters.
+
+---
+
+# 10. 🟠 Medium-Severity Findings
+
+8 Medium-severity findings were documented:
+
+- **BUG-004:** Completed (Done) jobs are counted and shown as overdue
+- **BUG-005:** "Showing N jobs" line does not change when a search or filter is used
+- **BUG-006:** Search is case-sensitive (Client name and Job title)
+- **BUG-007:** Clear filters does not clear the Search box
+- **BUG-008:** Page does not fit a phone-sized screen
+- **BUG-009 (automated: AT-003):** "Done" status filter always shows no jobs
+- **BUG-011:** Cancel clicked while saving still adds the job
+- **BUG-016:** A due date with a 5-digit year (e.g. 20206) is treated as overdue
 
 These issues do not necessarily prevent the core application from functioning, but they can cause incorrect information, confusing behaviour, or poor usability.
 
-BUG-004 and BUG-006 are based on documented QA assumptions and should be confirmed against the intended product requirements.
+BUG-004 and BUG-006 are based on documented QA assumptions and should be confirmed against the intended product requirements. BUG-004 depends on today's date: the same defect showed Overdue = 5 (expected 3) in the first session and Overdue = 6 (expected 4) on 8 October 2026.
 
 ---
 
-# 11. Low-Severity Finding
+# 11. 🟡 Low-Severity Findings
 
-## BUG-002 - Client Name Validation Spelling
+4 Low-severity findings were documented:
 
-Client Name validation correctly prevents an incomplete request from being submitted.
+- **BUG-002:** Client name validation message contains a spelling error ("requred")
+- **BUG-013:** A budget of 0 is accepted
+- **BUG-014:** Decimal budgets are shown with one decimal place (R1 500,5)
+- **BUG-015:** Client name has no length limit and a very long name stretches the layout
 
-However, the application displays:
-
-`Client name is requred.`
-
-instead of:
-
-`Client name is required.`
-
-This is a user-facing spelling issue rather than a failure of the validation logic.
-
-The defect was reproduced by automated test **AT-002**.
+BUG-002 is a user-facing spelling issue rather than a failure of the validation logic. BUG-013 depends on a business rule that the brief does not state (whether a zero budget is allowed) and must be confirmed with the product owner.
 
 ---
 
 # 12. Automated Testing Summary
 
-A focused automated regression suite was implemented using:
+Three important checks were automated using:
 
-- Python
-- pytest
-- Playwright
+- Python 3.14.2
+- pytest 9.1.1
+- Playwright 1.63.0 (with pytest-playwright 0.9.0)
 - Chromium
 
-The automated test file is:
+The automated files are in the `Automation` folder:
 
-`Automation/tests/test_job_tracker.py`
+| File | Purpose |
+|---|---|
+| `Automation/conftest.py` | Shared setup: finds the app, a page object (`JobTrackerPage`) and the `tracker` fixture that opens a fresh copy of the app for each test |
+| `Automation/tests/test_job_tracker.py` | The three automated checks (AT-001 to AT-003) |
+| `Automation/pytest.ini` | pytest settings |
+| `Automation/requirements.txt` | Packages to install |
 
-Automation was deliberately focused on selected high-value scenarios rather than duplicating all 17 manual test cases.
+The three checks were chosen because they cover the two most serious defects (High) and one broken feature (Medium), and because their results do not depend on today's date. Automation was deliberately focused on these scenarios rather than duplicating all 42 manual test cases.
+
+> [!NOTE]
+> Each test describes the **correct** behaviour and is marked `xfail(raises=AssertionError, strict=True)` with its bug ID. `raises=AssertionError` means only a failed check counts as the known bug (a missing file or timeout still shows as a real error). `strict=True` means that when a defect is fixed, the test passes and pytest reports XPASS(strict) as a failure, which is the reminder to remove the `xfail` marker.
 
 ---
 
 # 13. Automated Test Results
 
-| Test | Description | Result | Related Defect |
-|---|---|---|---|
-| Setup Check | Verify the application opens successfully | PASS | None |
-| AT-001 | Create a valid job request | PASS | None |
-| AT-002 | Required Client Name validation | FAIL | BUG-002 |
-| AT-003 | Verify Total Budget calculation | FAIL | BUG-001 |
+| Test | Description | Related Defect | Severity | Result (`python -m pytest -v`) |
+|---|---|---|---|---|
+| AT-001 | Total budget equals the sum of the jobs | BUG-001 | 🔴 High | 🟣 XFAIL |
+| AT-002 | A negative budget is rejected | BUG-003 | 🔴 High | 🟣 XFAIL |
+| AT-003 | The "Done" filter shows the Done jobs | BUG-009 | 🟠 Medium | 🟣 XFAIL |
 
 ## Automation Totals
 
-**Total automated checks:** 4  
-**Passed:** 2  
-**Failed:** 2
+**Total automated checks:** 3  
+**Expected failures (XFAIL):** 3  
+**Unexpected failures or errors:** 0
 
-The two failed tests represent known application defects.
+The three XFAIL results represent known application defects. They are **not automation framework failures**.
 
-They are **not automation framework failures**.
+With `python -m pytest --runxfail` the same tests fail with these messages:
 
-The tests intentionally assert the correct expected behaviour so that they can become passing regression tests when the underlying defects are fixed.
+| Test | Failure message |
+|---|---|
+| AT-001 | Total budget shows R87,800, but the 10 jobs add up to R100,300 (difference R12,500) |
+| AT-002 | A job with a budget of -5000 was saved: the table went from 10 to 11 jobs |
+| AT-003 | The Done filter shows 0 jobs, but 2 jobs have the status Done |
 
 ---
 
 # 14. Automation Findings
 
-## AT-001 - Valid Job Request
+## AT-001 - Total Budget Equals the Sum of the Jobs
 
-**Result: PASS**
+**Result:** 🟣 XFAIL (BUG-001)
 
-The automated test successfully:
-
-- Opened the New Request form.
-- Entered valid request information.
-- Saved the request.
-- Verified that the new client appeared.
-- Verified that the new job appeared.
-
-This confirms that the core valid job-creation workflow functions successfully for the tested scenario.
-
----
-
-## AT-002 - Client Name Validation
-
-**Result: FAIL**
-
-**Related Defect:** BUG-002
-
-The automation intentionally expects:
-
-`Client name is required.`
-
-The application displays:
-
-`Client name is requred.`
-
-The request is correctly rejected, but the validation text is incorrect.
-
-The test should remain unchanged until the application defect is fixed.
-
----
-
-## AT-003 - Total Budget
-
-**Result: FAIL**
-
-**Related Defect:** BUG-001
-
-The automated test reads the Budget value from each displayed job and independently calculates the expected total.
+The test reads the Budget value of every job in the table, adds them up itself, and compares the answer with the Total budget box. The expected value is **calculated by the test**, not hard-coded.
 
 **Calculated:** R100,300  
 **Displayed:** R87,800  
 **Difference:** R12,500
 
-This independently reproduces the financial calculation defect identified during manual testing.
+This independently reproduces the financial calculation defect found during manual testing.
+
+---
+
+## AT-002 - A Negative Budget Is Rejected
+
+**Result:** 🟣 XFAIL (BUG-003)
+
+The test counts the jobs, opens the New request form, enters a budget of `-5000`, clicks Save, waits for the app to finish saving, and counts the jobs again. The correct behaviour is that no job is added.
+
+**Jobs before:** 10  
+**Jobs after:** 11
+
+The application saved the invalid job.
+
+---
+
+## AT-003 - The "Done" Filter Shows the Done Jobs
+
+**Result:** 🟣 XFAIL (BUG-009)
+
+The test counts the jobs whose status is Done in the full list, chooses **Done** in the status filter, and counts the rows again.
+
+**Done jobs in the list:** 2  
+**Rows shown after filtering:** 0
+
+The filter option never matches.
+
+The tests should remain unchanged until the defects are fixed. When a defect is fixed, its test starts to pass, pytest reports XPASS(strict) as a failure, and the `xfail` marker should then be removed.
 
 ---
 
@@ -392,30 +420,41 @@ This independently reproduces the financial calculation defect identified during
 
 Automated test execution evidence is stored in the `Evidence/` directory.
 
-| Test | Evidence |
-|---|---|
-| AT-001 | `Evidence/AT-001-create-valid-job-pass.png` |
-| AT-002 | `Evidence/AT-002-client-validation-fail.png` |
-| AT-003 | `Evidence/AT-003-total-budget-fail.png` |
+| Run | Command (from the `Automation` folder) | Evidence |
+|---|---|---|
+| Run 1 | `python -m pytest -v` - three XFAIL results with their bug IDs | `Evidence/AT-run-1-expected-failures.png` |
+| Run 2 | `python -m pytest --runxfail` - the real failure messages | `Evidence/AT-run-2-failure-messages.png` |
 
 ---
 
 # 16. Manual Test Evidence
 
-Manual testing evidence is also stored in:
+Manual testing evidence is stored in:
 
 `Evidence/`
 
 Evidence was captured for findings including:
 
-- Incorrect Total Budget
+- Incorrect Total Budget (original data and after adding a job)
 - Client Name validation spelling
-- Negative budget acceptance
-- Completed jobs included as overdue
-- Incorrect filtered result count
-- Case-sensitive search
-- Clear Filters behaviour
+- Negative and zero budget acceptance
+- Completed jobs included as overdue (original data and a new Done job)
+- Incorrect filtered result count (including the empty search showing 10 jobs)
+- Case-sensitive search (Client name and Job title)
+- Clear Filters behaviour (after a status filter and after an empty search)
 - Mobile responsiveness
+- Done status filter showing no jobs
+- Duplicate job after a double-click on Save
+- Cancel while saving still adding the job
+- HTML tags displayed as formatting
+- Decimal budget display
+- Very long client name
+- Five-digit due year treated as overdue
+
+Automated execution evidence:
+
+- `Evidence/AT-run-1-expected-failures.png`
+- `Evidence/AT-run-2-failure-messages.png`
 
 The evidence supports the reproduction steps and actual results documented in the bug report.
 
@@ -427,15 +466,21 @@ Testing maintains traceability between manual testing, identified defects, autom
 
 | Functional Area | Manual Coverage | Defect | Automation | Evidence |
 |---|---|---|---|---|
-| Valid job creation | Yes | None | AT-001 | Automated |
-| Client Name validation | Yes | BUG-002 | AT-002 | Manual + Automated |
-| Total Budget | Yes | BUG-001 | AT-003 | Manual + Automated |
-| Negative Budget | Yes | BUG-003 | Not automated | Manual |
-| Overdue completed jobs | Yes | BUG-004 | Not automated | Manual |
+| Client Name validation | Yes | BUG-002 | Not automated | Manual |
+| Total Budget | Yes | BUG-001 | AT-001 | Manual + Automated |
+| Negative budget | Yes | BUG-003 | AT-002 | Manual + Automated |
+| Zero / decimal budget | Yes | BUG-013, BUG-014 | Not automated | Manual |
+| Overdue and Done jobs | Yes | BUG-004 | Not automated | Manual |
 | Result count | Yes | BUG-005 | Not automated | Manual |
 | Search case sensitivity | Yes | BUG-006 | Not automated | Manual |
 | Clear Filters | Yes | BUG-007 | Not automated | Manual |
 | Mobile responsiveness | Yes | BUG-008 | Not automated | Manual |
+| Status filter (Done option) | Yes | BUG-009 | AT-003 | Manual + Automated |
+| Double-click Save | Yes | BUG-010 | Not automated | Manual |
+| Cancel while saving | Yes | BUG-011 | Not automated | Manual |
+| HTML in text fields | Yes | BUG-012 | Not automated | Manual |
+| Long text | Yes | BUG-015 | Not automated | Manual |
+| Due date years | Yes | BUG-016 | Not automated | Manual |
 
 ---
 
@@ -450,6 +495,10 @@ Important assumptions included:
 3. A valid job budget is assumed to be greater than zero.
 4. Completed jobs should not normally continue to be counted as overdue.
 5. User-facing search should normally be case-insensitive.
+6. Text typed by a user should be displayed exactly as typed (no HTML interpretation).
+7. A new request should not be saved twice by a double-click.
+8. The absence of Edit and Delete features is an observation (OBS-02), not a defect, and whether past due dates are allowed for new requests (OBS-01) is a question for the product owner.
+9. The Overdue figure depends on today's date; the expected values in this report are for 8 October 2026.
 
 Findings that depend on product assumptions should be confirmed with the product owner.
 
@@ -466,10 +515,11 @@ The following limitations apply:
 - Mobile testing used Chrome DevTools emulation rather than a physical iPhone.
 - Cross-browser testing across Firefox, Safari, and Edge was not part of the completed scope.
 - Performance testing was not performed.
-- Security testing was not performed.
+- Security testing was limited to basic input-handling checks (special characters and HTML-like text); no penetration testing was performed.
 - Accessibility testing was not performed as a dedicated test phase.
 - Backend/API testing was not applicable to the supplied local HTML test build.
-- Automation covers selected regression scenarios rather than the complete manual test suite.
+- Automation covers selected regression scenarios rather than the complete manual test suite. The automated suite covers three defects (BUG-001, BUG-003, BUG-009); the High-severity defects BUG-010 (duplicate save) and BUG-012 (HTML in text fields) are not yet automated.
+- Results that depend on the current date (Overdue) were recorded on 8 October 2026.
 
 These limitations should be considered when interpreting the final QA assessment.
 
@@ -477,51 +527,65 @@ These limitations should be considered when interpreting the final QA assessment
 
 # 20. Risk Assessment
 
-The greatest current risk is **financial-data integrity**.
+The greatest current risks are **financial-data integrity** and **data quality**.
 
-BUG-001 and BUG-003 can result in incorrect financial information being displayed or stored.
+BUG-001 and BUG-003 can result in incorrect financial information being displayed or stored. BUG-010 can create duplicate records that inflate counts and totals, and the application provides no way to delete them. BUG-012 is a security risk because typed text is interpreted as page content.
 
 Additional risks include:
 
-- Incorrect operational information from overdue calculations.
-- Confusing search and filtering behaviour.
-- Incorrect result counts.
-- Poor usability on mobile devices.
-- Minor loss of professionalism from validation-message spelling errors.
+- Incorrect operational information from overdue calculations (BUG-004, BUG-016).
+- Confusing or broken search and filtering behaviour (BUG-005, BUG-006, BUG-007, BUG-009).
+- Cancelling a request that is then saved anyway (BUG-011).
+- Poor usability on mobile devices (BUG-008).
+- Minor loss of professionalism from validation-message spelling, decimal formatting and layout issues (BUG-002, BUG-014, BUG-015).
 
 ---
 
 # 21. Release Recommendation
 
-## Recommendation: NOT READY FOR RELEASE
+> [!CAUTION]
+> **Recommendation: NOT READY FOR RELEASE**
+
 
 Based on the testing performed, the current application build should **not be considered release-ready without remediation of the High-severity defects**.
 
-The following defects should be prioritised before release:
+### 🔴 Must Fix
 
-### Must Fix
-
-**BUG-001 - Incorrect Total Budget**
+**BUG-001 - Incorrect Total Budget** (automated: AT-001)
 
 Financial summary information must accurately reflect the underlying job data.
 
-**BUG-003 - Negative Budget Values Are Accepted**
+**BUG-003 - Negative Budget Values Are Accepted** (automated: AT-002)
 
 Invalid negative financial values should not be accepted.
 
-### Should Review / Fix
+**BUG-010 - Clicking Save Twice Creates Duplicate Jobs**
 
-- BUG-004 - Completed jobs counted as overdue
-- BUG-005 - Incorrect filtered result count
-- BUG-006 - Case-sensitive search
-- BUG-007 - Clear Filters does not clear Search
-- BUG-008 - Poor mobile responsiveness
+One accidental double-click must not create duplicate records.
 
-### Lower Priority
+**BUG-012 - HTML Typed in Text Fields Is Interpreted as Page Content**
 
-- BUG-002 - Client Name validation spelling error
+User-typed text must be displayed as text to remove the security risk.
 
-Although BUG-002 is low severity, it should still be corrected before a polished production release.
+### 🟠 Should Review / Fix
+
+- **BUG-004:** Completed (Done) jobs are counted and shown as overdue
+- **BUG-005:** "Showing N jobs" line does not change when a search or filter is used
+- **BUG-006:** Search is case-sensitive (Client name and Job title)
+- **BUG-007:** Clear filters does not clear the Search box
+- **BUG-008:** Page does not fit a phone-sized screen
+- **BUG-009:** "Done" status filter always shows no jobs
+- **BUG-011:** Cancel clicked while saving still adds the job
+- **BUG-016:** A due date with a 5-digit year (e.g. 20206) is treated as overdue
+
+### 🟡 Lower Priority
+
+- **BUG-002:** Client name validation message contains a spelling error ("requred")
+- **BUG-013:** A budget of 0 is accepted
+- **BUG-014:** Decimal budgets are shown with one decimal place (R1 500,5)
+- **BUG-015:** Client name has no length limit and a very long name stretches the layout
+
+Although the Low-severity defects do not affect the core workflow, BUG-002 and BUG-014 should still be corrected before a polished production release.
 
 ---
 
@@ -529,42 +593,41 @@ Although BUG-002 is low severity, it should still be corrected before a polished
 
 After defects are fixed, QA should perform:
 
-1. Defect verification testing.
+1. Defect verification testing for every bug in the bug report.
 2. Regression testing of affected functionality.
-3. Full rerun of the automated test suite.
-4. Retesting of Total Budget calculations.
-5. Negative and boundary testing of Budget validation.
-6. Retesting of search and filtering.
-7. Retesting of overdue calculations.
-8. Responsive testing after mobile-layout changes.
+3. Full rerun of the automated test suite (`python -m pytest -v` from the `Automation` folder).
+4. Retesting of Total Budget calculations with non-zero amounts, including after adding jobs.
+5. Negative, zero, decimal and boundary testing of Budget validation.
+6. Retesting of search (casing) and **every** status filter option.
+7. Retesting of overdue calculations on the day of retest, including Done jobs and unusual year values.
+8. Retesting of double-click Save and Cancel while saving.
+9. Retesting of special characters and HTML-like text in Client name and Job title.
+10. Responsive testing after mobile-layout changes.
 
-AT-002 and AT-003 should remain unchanged until the corresponding defects are corrected.
+AT-001, AT-002 and AT-003 should remain unchanged until the corresponding defects are corrected.
 
-Once fixed:
+Once a defect is fixed, its test passes and pytest reports **XPASS(strict)** as a failure. That is the signal to remove its `xfail` marker so that the test becomes a normal regression test:
 
-- AT-002 should change from **FAIL** to **PASS**.
-- AT-003 should change from **FAIL** to **PASS**.
+- AT-001 (BUG-001) should change from XFAIL to **PASS**.
+- AT-002 (BUG-003) should change from XFAIL to **PASS**.
+- AT-003 (BUG-009) should change from XFAIL to **PASS**.
 
-This provides repeatable regression protection against those defects returning.
+Recommended additional automated checks (not yet implemented): a double-click on Save adds only one job (BUG-010), and HTML tags typed into text fields are shown as text (BUG-012).
 
 ---
 
 # 23. Final QA Conclusion
 
-The Job Request Tracker provides functioning core workflows, including job creation, required-field validation, search, filtering, and job-data display.
+The Job Request Tracker provides functioning core workflows, including job creation, required-field validation, search, three of its four status filter options, and job-data display.
 
-However, testing identified **8 documented defects**, including **2 High-severity financial-data issues**.
+However, testing identified **16 documented defects**: **4 High**, **8 Medium** and **4 Low**.
 
-The most significant problem is the incorrect Total Budget. The application displays **R87,800**, while the displayed jobs total **R100,300**.
+The most significant problems are the incorrect Total Budget (it always leaves out the newest job: R87 800 shown against R100 300), the acceptance of negative budgets, duplicate jobs created by a double-click on Save, and HTML typed into text fields being interpreted as page content.
 
-The application also accepts negative budget values, creating an additional financial-data integrity risk.
+Manual testing provided broad functional and exploratory coverage across **42 documented test cases** (✅ 12 PASS, ⚠️ 10 PASS with known issue, ❌ 20 FAIL). A second, control-by-control session applying the same checklist to every input produced eight additional defects, which shows the value of testing every option and every input rather than one example of each feature.
 
-Manual testing provided broad functional and exploratory coverage across **17 documented test cases**.
+Targeted automated testing was implemented using Python, pytest, and Playwright to provide repeatable regression coverage for selected high-value functionality. The automated suite reproduces three known defects (two High, one Medium) as expected failures and is ready to become passing regression tests once the defects are fixed.
 
-Targeted automated testing was subsequently implemented using Python, pytest, and Playwright to provide repeatable regression coverage for selected high-value functionality.
-
-The automated suite successfully verifies valid job creation and automatically reproduces two known defects.
-
-Based on the evidence collected, the application should **not be released until the High-severity financial defects have been corrected, retested, and verified**.
+Based on the evidence collected, the application should **not be released until the High-severity defects have been corrected, retested, and verified**.
 
 After remediation, the relevant manual tests and the complete automated regression suite should be rerun before a final release decision is made.

@@ -4,26 +4,34 @@
 
 This repository contains my Quality Assurance testing work for the **Job Request Tracker QA Challenge**.
 
-The objective of this project is to evaluate the supplied Job Request Tracker application before release by identifying functional, validation, calculation, usability, and responsive-design issues that could affect users.
+The objective of this project is to evaluate the supplied Job Request Tracker application before release by identifying functional, validation, calculation, input-handling, usability and responsive-design issues that could affect users or data accuracy.
 
-The project includes both **manual QA testing** and **automated browser testing**, and concludes with a final **Test Summary Report** containing a risk assessment and release recommendation.
+The project includes both **manual QA testing** and **automated browser testing**, and concludes with a final **Test Summary Report** containing a risk assessment, release recommendation and retesting guidance.
 
-Manual testing was used to explore the application, validate expected behaviour, identify defects, test edge cases, and capture supporting evidence.
+| At a glance | |
+|---|---|
+| Manual test cases | **42** (✅ 12 PASS, ⚠️ 10 PASS with known issue, ❌ 20 FAIL) |
+| Documented defects | **16** (🔴 4 High, 🟠 8 Medium, 🟡 4 Low) |
+| Observations for the product owner | 2 (OBS-01, OBS-02) |
+| Automated checks | **3** (AT-001 to AT-003), each reproducing a logged defect |
+| Release recommendation | 🔴 **Not ready for release** until the High-severity defects are fixed and retested |
 
-A focused automated regression suite was then implemented using **Python, pytest, and Playwright** to verify selected high-value application behaviours and reproduce important defects identified during manual testing.
+> [!IMPORTANT]
+> The supplied application file (`job-tracker-demo.html`) is **not included in this repository**. To run the automated tests you need your own authorised copy; see [Automation Setup and Execution](#automation-setup-and-execution).
 
 Testing covers:
 
 - Creating new job requests
 - Required-field validation
-- Budget validation
+- Budget validation (empty, negative, zero, decimal, very large)
+- Special characters, HTML-like text and very long text
 - Total Budget calculations
-- Job status handling
-- Overdue-job behaviour
-- Search functionality
-- Status filtering
+- Job status handling and every status filter option
+- Overdue-job behaviour, including completed jobs and unusual dates
+- Search functionality (casing, partial text, no result)
 - Clear Filters functionality
 - Job-result counts
+- Duplicate submission and Cancel while saving
 - Desktop usability
 - Mobile/responsive behaviour
 - Automated regression testing
@@ -45,9 +53,22 @@ The following testing techniques were used:
 - Automated Browser Testing
 - Regression Testing
 
-Manual testing provided broad coverage of the application.
+## Control-by-control checklist
 
-Automation was then used for selected high-value and repeatable checks rather than attempting to automate the entire manual test suite.
+Every control on the page was listed and the same checklist was applied to each one:
+
+| Check | Example |
+|---|---|
+| Empty and spaces only | Client name left empty, or three spaces |
+| Boundary values | Budget of `0`, `-5000`, `1500.50`, `999999999999`; due dates in the past, today, and year `20206` |
+| Special characters | `<b>Test</b>`, `O'Brien & Sons "Ltd"` |
+| Very long text | 150 characters in Client name |
+| Repeating the action quickly | Double-click **Save request** |
+| Interrupting the action | Click **Cancel** while the request is saving |
+| Every option of every drop-down | Pending, In progress **and Done** |
+| Calculated values | Work out the expected figure by hand before reading the screen |
+
+Manual testing provided broad coverage of the application. Automation was then used for selected high-value, repeatable checks rather than attempting to automate the entire manual test suite.
 
 ---
 
@@ -56,13 +77,14 @@ Automation was then used for selected high-value and repeatable checks rather th
 ## Manual Testing Environment
 
 - **Operating System:** Windows
-- **Browser:** Google Chrome
-- **Application:** Job Request Tracker QA test build
+- **Browser:** Google Chrome Version 154.0.8037.93 (Official Build) (64-bit)
+- **Application:** Job Request Tracker QA test build (`job-tracker-demo.html`)
 - **Desktop Testing:** Google Chrome desktop browser
 - **Mobile Testing:** Chrome DevTools Device Toolbar
 - **Mobile Device:** iPhone 16
 - **Mobile Viewport:** 393 × 852
 - **Application Type:** Local HTML application
+- **Test dates:** first session on or before 6 October 2026; second session on 8 October 2026
 
 ## Automation Environment
 
@@ -79,237 +101,93 @@ Automation was then used for selected high-value and repeatable checks rather th
 
 ## Manual Testing Summary
 
-A total of **17 manual test cases** were executed.
+A total of **42 manual test cases** were executed.
 
 ### New Request Form
 
-Testing included:
-
 - Creating a request with valid information
-- Client Name required validation
-- Job Title required validation
-- Due Date required validation
-- Budget required validation
-- Negative budget handling
-- Zero budget boundary testing
-- Cancelling a new request
-- Creating a request with an `In progress` status
+- Client Name, Job Title, Due Date and Budget required validation
+- Client Name with spaces only, HTML tags, special characters and 150 characters
+- Job Title with HTML tags
+- Negative, zero, decimal and very large budgets
+- Due dates in the past, today, and with a 5-digit year
+- Saving with each status (Pending, In progress, Done)
+- Double-clicking **Save request**
+- Cancelling before saving and while saving
 
 ### Data and Business Rules
 
-Testing included:
-
-- Total Budget calculation
+- Total Budget calculation (original data and after adding jobs)
 - Overdue-job calculation
 - Treatment of completed jobs with past due dates
+- A Done job with a future due date
 
 ### Search and Filtering
 
-Testing included:
-
-- Search by Client Name
-- Search by Job Title
+- Search by Client Name and by Job Title
 - Search using different letter casing
-- Status filtering
-- Clear Filters functionality
+- Partial text and no-match searches
+- Every status filter option (Pending, In progress, Done)
+- Search and status filter used together
+- Clear Filters after a status filter and after a search
 - Filtered job-result count
 
 ### Responsive Testing
 
-The application was tested using Chrome DevTools with an **iPhone 16 viewport of 393 × 852**.
-
-The mobile test included:
-
-- Dashboard visibility
-- Summary information
-- Search and filter controls
-- Job table usability
-- Horizontal page behaviour
-- Access to the New Request form
+The application was tested using Chrome DevTools with an **iPhone 16 viewport of 393 × 852**, covering the dashboard, summary boxes, search and filter controls, job table, horizontal page behaviour and access to the New Request form.
 
 ---
 
 # Defects Identified
 
-Manual testing identified **8 documented defects**.
+Testing identified **16 documented defects**. Full reproduction steps, expected and actual results (with numbers), severity reasons and evidence are in [`Docs/bug-report.md`](Docs/bug-report.md).
 
-## BUG-001 - Incorrect Total Budget
-
-**Severity: High**
-
-The 10 displayed jobs have the following budgets:
-
-- R4,500
-- R18,000
-- R9,600
-- R3,200
-- R2,800
-- R7,500
-- R5,200
-- R22,000
-- R15,000
-- R12,500
-
-The correct combined total is:
-
-**R100,300**
-
-The application displays:
-
-**R87,800**
-
-The displayed Total Budget is therefore **R12,500 lower** than the sum of the displayed job budgets.
-
-This defect was also reproduced by automated test **AT-003**.
-
----
-
-## BUG-002 - Client Name Validation Message Contains a Spelling Error
-
-**Severity: Low**
-
-Client Name validation correctly prevents submission when the field is empty.
-
-However, the application displays:
-
-`Client name is requred.`
-
-instead of:
-
-`Client name is required.`
-
-The validation functionality works, but the user-facing message contains a spelling error.
-
-This defect was also reproduced by automated test **AT-002**.
-
----
-
-## BUG-003 - Negative Budget Values Are Accepted
-
-**Severity: High**
-
-The New Request form accepts negative budget values.
-
-For example:
-
-`-5000`
-
-can be saved successfully and is displayed as:
-
-`R-5 000`
-
-Invalid financial data should not be accepted as a valid job budget.
-
----
-
-## BUG-004 - Completed Jobs Are Counted and Displayed as Overdue
-
-**Severity: Medium**
-
-Based on the documented QA assumption that a completed job should no longer be considered overdue, the application includes completed jobs with past due dates in the Overdue count.
-
-The application displays:
-
-**5 overdue jobs**
-
-while only:
-
-**3 jobs**
-
-are both overdue and unfinished.
-
-This finding depends on the expected business rule and should be confirmed with the product owner.
-
----
-
-## BUG-005 - Job Result Count Does Not Update When Filters Are Applied
-
-**Severity: Medium**
-
-Search and Status filtering correctly reduce the jobs displayed in the table.
-
-However, the result counter continues to display:
-
-`Showing 10 jobs`
-
-even when fewer jobs are visible.
-
-For example, searching for:
-
-`Kestrel Motors`
-
-displays two matching jobs while the counter continues to show 10 jobs.
-
----
-
-## BUG-006 - Search Is Case-Sensitive
-
-**Severity: Medium**
-
-Searching for:
-
-`Kestrel Motors`
-
-returns the expected matching jobs.
-
-Searching for:
-
-`kestrel motors`
-
-returns:
-
-`No jobs match your filters.`
-
-This finding is based on the QA assumption that a user-facing search should normally behave in a case-insensitive manner.
-
----
-
-## BUG-007 - Clear Filters Does Not Clear the Search Field
-
-**Severity: Medium**
-
-Clicking **Clear filters** resets the Status filter to:
-
-`All statuses`
-
-but does not clear the Search field.
-
-The existing search term remains active and the table therefore remains filtered.
-
----
-
-## BUG-008 - Poor Mobile Responsiveness
-
-**Severity: Medium**
-
-When tested using an iPhone 16 viewport of **393 × 852**, the application remains wider than the available screen.
-
-The user must horizontally drag across the page to access information and controls including:
-
-- Total Budget
-- New Request
-- Status filter
-- Clear Filters
-- Due Date
-- Status
-- Budget
-
-The functionality remains accessible, but the layout provides a poor mobile user experience.
-
----
-
-## Defect Summary
-
-| Bug ID | Description | Severity | Automation |
+| Bug ID | Description | Severity | Automated |
 |---|---|---|---|
-| BUG-001 | Total Budget does not equal the sum of displayed job budgets | High | Reproduced by AT-003 |
-| BUG-002 | Client Name validation message contains a spelling error | Low | Reproduced by AT-002 |
-| BUG-003 | Negative budget values are accepted | High | Manual |
-| BUG-004 | Completed jobs are counted and displayed as overdue | Medium | Manual |
-| BUG-005 | Job result count does not update after filtering | Medium | Manual |
-| BUG-006 | Search is case-sensitive | Medium | Manual |
-| BUG-007 | Clear Filters does not clear Search | Medium | Manual |
-| BUG-008 | Poor responsiveness on phone-sized screens | Medium | Manual |
+| BUG-001 | Total Budget does not equal the sum of the job budgets (the newest job is left out) | 🔴 High | AT-001 |
+| BUG-002 | Client name validation message contains a spelling error ("requred") | 🟡 Low | Manual |
+| BUG-003 | New request form accepts a negative budget | 🔴 High | AT-002 |
+| BUG-004 | Completed (Done) jobs are counted and shown as overdue | 🟠 Medium | Manual |
+| BUG-005 | "Showing N jobs" line does not change when a search or filter is used | 🟠 Medium | Manual |
+| BUG-006 | Search is case-sensitive (Client name and Job title) | 🟠 Medium | Manual |
+| BUG-007 | Clear filters does not clear the Search box | 🟠 Medium | Manual |
+| BUG-008 | Page does not fit a phone-sized screen | 🟠 Medium | Manual |
+| BUG-009 | "Done" status filter always shows no jobs | 🟠 Medium | AT-003 |
+| BUG-010 | Clicking Save twice creates duplicate jobs | 🔴 High | Manual |
+| BUG-011 | Cancel clicked while saving still adds the job | 🟠 Medium | Manual |
+| BUG-012 | HTML tags typed in Client name and Job title are interpreted instead of shown as text | 🔴 High | Manual |
+| BUG-013 | A budget of 0 is accepted | 🟡 Low | Manual |
+| BUG-014 | Decimal budgets are shown with one decimal place (`R1 500,5`) | 🟡 Low | Manual |
+| BUG-015 | Client name has no length limit and a very long name stretches the layout | 🟡 Low | Manual |
+| BUG-016 | A due date with a 5-digit year (e.g. 20206) is treated as overdue | 🟠 Medium | Manual |
+
+## High-severity defects
+
+### BUG-001 - Incorrect Total Budget 🔴
+
+The 10 displayed jobs add up to **R100 300**, but the Total budget box shows **R87 800**, which is **R12 500 lower**. R12 500 is exactly the budget of the last job in the list. When a job is added, the **newest job** is the one left out (adding R1 000 shows R100 300 instead of R101 300), which points to an off-by-one error in the total calculation. Reproduced by automated test **AT-001**.
+
+### BUG-003 - Negative Budget Accepted 🔴
+
+A budget of `-5000` is saved and shown as `R-5 000`. Invalid financial data is stored as a real job. Reproduced by automated test **AT-002**.
+
+### BUG-010 - Clicking Save Twice Creates Duplicate Jobs 🔴
+
+One double-click on **Save request** creates two identical jobs (12 rows instead of 11, Open jobs 10 instead of 9). The application has no Delete button, so the duplicate cannot be removed.
+
+### BUG-012 - HTML Typed in Text Fields Is Interpreted 🔴
+
+`<b>Test</b>` in Client name is shown as bold **Test**, and `<i>Test</i>` in Job title as *Test*. This is a recognised security weakness (cross-site scripting).
+
+## Observations (not counted as defects)
+
+| ID | Observation |
+|---|---|
+| OBS-01 | New requests can be saved with a past or unrealistic due date (question for the product owner) |
+| OBS-02 | The application has no way to edit or delete a job (suggestion; makes BUG-010 and BUG-011 worse) |
+
+> [!NOTE]
+> **The Overdue figure depends on today's date.** BUG-004 showed Overdue = 5 (expected 3) in the first session and Overdue = 6 (expected 4) on 8 October 2026. The behaviour is the same; the numbers move with the date, so expected results are written as a rule: *due date before today AND status not Done*.
 
 ---
 
@@ -317,318 +195,152 @@ The functionality remains accessible, but the layout provides a poor mobile user
 
 ## Automation Objective
 
-A focused automated regression suite was created using:
+A focused automated regression suite was created using Python, pytest, Playwright and Chromium.
 
-- Python
-- pytest
-- Playwright
-- Chromium
+The objective was not to automate every manual test case. Three checks were chosen because they cover the **two most serious defects (High)** and **one broken feature (Medium)**, and because their results do not depend on today's date.
 
-The objective was not to automate every manual test case.
+## The three automated checks
 
-Instead, automation focuses on a small number of important, repeatable behaviours that provide meaningful regression coverage.
+| ID | Test function | Defect | Severity | What it checks |
+|---|---|---|---|---|
+| AT-001 | `test_total_budget_equals_sum_of_jobs` | BUG-001 | 🔴 High | The Total budget box equals the sum of the budgets in the table |
+| AT-002 | `test_negative_budget_is_rejected` | BUG-003 | 🔴 High | A job with a budget of `-5000` is not added to the table |
+| AT-003 | `test_done_filter_shows_done_jobs` | BUG-009 | 🟠 Medium | Choosing **Done** in the status filter lists every Done job |
 
-The automated tests are located in:
+Each test follows **Arrange - Act - Assert**: it prepares the data and works out the correct answer itself (nothing is hard-coded), does what a user would do, and compares the page with the correct answer.
 
-`Automation/tests/test_job_tracker.py`
+## Why the tests are marked `xfail`
 
----
+Each test describes the **correct** behaviour, and the application currently has the bug, so each test is marked:
 
-## Automation Setup Check
+```python
+@pytest.mark.xfail(raises=AssertionError, strict=True, reason="BUG-001: ...")
+```
 
-Before executing the primary automated tests, a smoke test verifies that Playwright can successfully open the Job Request Tracker.
+- `raises=AssertionError` - only a failed **check** counts as the known bug. A missing file, a timeout or a wrong locator still shows as a real error and is not hidden.
+- `strict=True` - when a developer fixes the bug, the test passes and pytest reports **XPASS(strict)** as a failure. That is the reminder to remove the `xfail` marker so the test becomes a normal regression test.
 
-### Test
+## Results
 
-`test_job_tracker_opens`
+| Command | Result |
+|---|---|
+| `python -m pytest -v` | 🟣 **3 xfailed** - each listed with its bug ID |
+| `python -m pytest --runxfail` | ❌ 3 failed - the real failure messages (below) |
 
-### Expected Result
+| Test | Real failure message |
+|---|---|
+| AT-001 | `Total budget shows R87,800, but the 10 jobs add up to R100,300 (difference R12,500)` |
+| AT-002 | `A job with a budget of -5000 was saved: the table went from 10 to 11 jobs` |
+| AT-003 | `The Done filter shows 0 jobs, but 2 jobs have the status Done` |
 
-The application opens and the **Job Request Tracker** heading is visible.
-
-### Current Result
-
-**PASS**
-
----
-
-## AT-001 - Create a Valid Job Request
-
-### Purpose
-
-Verify that a user can successfully create a new job request when all required fields contain valid information.
-
-### Automated Steps
-
-The test:
-
-1. Opens the application.
-2. Clicks **+ New request**.
-3. Enters a valid Client Name.
-4. Enters a valid Job Title.
-5. Enters a Due Date.
-6. Enters a valid Budget.
-7. Leaves the default status as `Pending`.
-8. Clicks **Save request**.
-9. Verifies that the new Client Name appears.
-10. Verifies that the new Job Title appears.
-
-### Expected Result
-
-The request should be saved and displayed in the jobs table.
-
-### Current Result
-
-**PASS**
-
-### Evidence
-
-`Evidence/AT-001-create-valid-job-pass.png`
-
----
-
-## AT-002 - Required Client Name Validation
-
-### Purpose
-
-Verify that the application rejects a new job request when the required Client Name field is empty.
-
-### Automated Steps
-
-The test:
-
-1. Opens the application.
-2. Opens the New Request form.
-3. Leaves Client Name empty.
-4. Completes the other required fields.
-5. Attempts to save the request.
-6. Verifies that the form remains open.
-7. Verifies that the correct validation message is displayed.
-
-### Expected Result
-
-The application should display:
-
-`Client name is required.`
-
-### Actual Result
-
-The application displays:
-
-`Client name is requred.`
-
-### Current Result
-
-**FAIL - Known defect BUG-002**
-
-The application correctly prevents the incomplete request from being submitted, but the validation message contains a spelling error.
-
-The automated test intentionally continues to assert the correct expected behaviour instead of accepting the defective text.
-
-### Evidence
-
-`Evidence/AT-002-client-validation-fail.png`
-
----
-
-## AT-003 - Total Budget Calculation
-
-### Purpose
-
-Verify that the Total Budget displayed by the application equals the sum of the individual job budgets displayed in the table.
-
-### Automated Approach
-
-The test does not hard-code **R100,300** as the expected result.
-
-Instead, Playwright reads the Budget value from every displayed job row.
-
-Python then converts the displayed budget values into numbers and calculates the total independently.
-
-The automated calculation produces:
-
-**R100,300**
-
-The application displays:
-
-**R87,800**
-
-### Expected Result
-
-The displayed Total Budget should equal the calculated sum of all job budgets.
-
-### Actual Result
-
-**Displayed Total Budget:** R87,800
-
-**Calculated Total Budget:** R100,300
-
-**Difference:** R12,500
-
-### Current Result
-
-**FAIL - Known defect BUG-001**
-
-This automated test independently reproduces the Total Budget defect identified during manual testing.
-
-### Evidence
-
-`Evidence/AT-003-total-budget-fail.png`
-
----
-
-## Automated Test Results
-
-| Test | Purpose | Result | Related Defect |
-|---|---|---|---|
-| Setup Check | Verify application opens | PASS | None |
-| AT-001 | Create valid job request | PASS | None |
-| AT-002 | Required Client Name validation | FAIL | BUG-002 |
-| AT-003 | Total Budget calculation | FAIL | BUG-001 |
-
-The current complete automated test suite therefore contains **4 checks**:
-
-- **2 Passed**
-- **2 Failed**
-
-The two failing tests represent known application defects rather than failures in the automation framework.
-
-The tests intentionally continue to assert the correct expected behaviour so that they can become passing regression tests once the application defects are fixed.
-
----
+The three failures represent known application defects, not problems in the automation framework.
 
 ## Automated Test Evidence
 
-Evidence from the Playwright automated test execution is stored in the `Evidence/` directory.
+| Run | Evidence |
+|---|---|
+| `python -m pytest -v` (three XFAIL results with their bug IDs) | `Evidence/AT-run-1-expected-failures.png` |
+| `python -m pytest --runxfail` (the real failure messages) | `Evidence/AT-run-2-failure-messages.png` |
 
-| Automated Test | Result | Related Defect | Evidence |
-|---|---|---|---|
-| AT-001 - Create valid job request | PASS | None | `Evidence/AT-001-create-valid-job-pass.png` |
-| AT-002 - Client Name validation | FAIL | BUG-002 | `Evidence/AT-002-client-validation-fail.png` |
-| AT-003 - Total Budget calculation | FAIL | BUG-001 | `Evidence/AT-003-total-budget-fail.png` |
+## Automation files
 
-AT-002 and AT-003 intentionally assert the expected correct behaviour of the application. Their failures reproduce defects identified during manual testing rather than failures in the automation framework.
+| File | Purpose |
+|---|---|
+| `Automation/conftest.py` | Shared setup: finds the app, the `JobTrackerPage` page object (how to read and use the page) and the `tracker` fixture that opens a fresh copy of the app for each test |
+| `Automation/tests/test_job_tracker.py` | The three automated checks |
+| `Automation/pytest.ini` | pytest settings |
+| `Automation/requirements.txt` | Packages to install |
 
-- **AT-002 / BUG-002:** The application prevents submission when the Client Name is empty, but displays `Client name is requred.` instead of `Client name is required.`
-- **AT-003 / BUG-001:** The application displays a Total Budget of `R87,800`, while the automated test calculates `R100,300` from the individual job budgets.
+The top of each Python file contains a docstring that explains how it works.
 
 ---
 
 # Automation Setup and Execution
 
-## Important Application File Requirement
+> [!IMPORTANT]
+> Run every command **from the `Automation` folder**. If you run pytest from the repository root, `pytest.ini` is ignored and the bug IDs are not shown.
 
-The original:
+## Application file requirement
 
-`Job_traker.html`
+The original `job-tracker-demo.html` file supplied for the QA challenge is **not included in this repository**. It is treated as confidential challenge material and remains outside the repository (`Automation/app/` is listed in `.gitignore`).
 
-file supplied for the QA challenge is **not included in this repository**.
+The tests look for the file in this order and use the first one found:
 
-It is treated as confidential challenge material and remains outside the GitHub repository.
+1. The path in the `JOB_TRACKER_PATH` environment variable
+2. `Automation/app/job-tracker-demo.html`  ← **recommended**
+3. The folder above `Automation`
+4. The `Downloads` folder
 
-The automated tests require the tester to have an authorised local copy of this file.
+If the file is not found, the run stops with a message saying what to do.
 
-By default, the automation looks for:
-
-`Job_traker.html`
-
-inside the current user's Downloads folder.
-
-For example:
-
-```text
-C:\Users\<username>\Downloads\Job_traker.html
-```
-
-A different location can be supplied using the `JOB_TRACKER_PATH` environment variable.
-
-Example using PowerShell:
-
-```powershell
-$env:JOB_TRACKER_PATH="C:\path\to\Job_traker.html"
-```
-
----
-
-## 1. Navigate to the Automation Directory
-
-From the repository root:
+## Windows (PowerShell)
 
 ```powershell
 cd Automation
-```
-
----
-
-## 2. Create a Python Virtual Environment
-
-```powershell
 python -m venv .venv
-```
-
----
-
-## 3. Activate the Virtual Environment
-
-Using PowerShell:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-If PowerShell blocks activation for the current session, the execution policy can be adjusted for that process according to the user's local security policy.
-
----
-
-## 4. Install Dependencies
-
-```powershell
 python -m pip install -r requirements.txt
-```
-
----
-
-## 5. Install Chromium
-
-```powershell
 python -m playwright install chromium
+mkdir app
+copy "$env:USERPROFILE\Downloads\job-tracker-demo.html" app\
+python -m pytest -v
 ```
 
----
+If PowerShell blocks the activation, run `Set-ExecutionPolicy -Scope Process Bypass` and activate again.
 
-## 6. Run the Complete Automated Test Suite
+To use a file stored elsewhere:
 
 ```powershell
-python -m pytest tests\test_job_tracker.py -v
+$env:JOB_TRACKER_PATH = "C:\path\to\job-tracker-demo.html"
 ```
 
----
+## macOS / Linux
 
-## Run Individual Tests
+```bash
+cd Automation
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m playwright install chromium
+mkdir -p app && cp ~/Downloads/job-tracker-demo.html app/
+python -m pytest -v
+```
 
-### Setup Check
+To use a file stored elsewhere:
+
+```bash
+export JOB_TRACKER_PATH=/path/to/job-tracker-demo.html
+```
+
+## Expected output
+
+```text
+tests/test_job_tracker.py::test_total_budget_equals_sum_of_jobs[chromium] XFAIL (BUG-001: Total budget leaves out the last job in the list)
+tests/test_job_tracker.py::test_negative_budget_is_rejected[chromium] XFAIL (BUG-003: a negative budget is accepted and saved)
+tests/test_job_tracker.py::test_done_filter_shows_done_jobs[chromium] XFAIL (BUG-009: the 'Done' status filter shows no jobs)
+============ 3 xfailed ============
+```
+
+## Other useful commands
 
 ```powershell
-python -m pytest tests\test_job_tracker.py::test_job_tracker_opens -v
+python -m pytest --runxfail                # show the real failure message of each test
+python -m pytest --runxfail --tb=line      # the same, one line per failure
+python -m pytest --headed --slowmo 800     # watch the browser while the tests run
+python -m pytest tests\test_job_tracker.py::test_done_filter_shows_done_jobs -v   # one test
 ```
 
-### AT-001
+(On macOS/Linux use `/` instead of `\` in the last path.)
 
-```powershell
-python -m pytest tests\test_job_tracker.py::test_create_valid_job_request -v
-```
+## Troubleshooting
 
-### AT-002
-
-```powershell
-python -m pytest tests\test_job_tracker.py::test_client_name_is_required -v
-```
-
-### AT-003
-
-```powershell
-python -m pytest tests\test_job_tracker.py::test_total_budget_matches_sum_of_jobs -v
-```
+| Problem | Fix |
+|---|---|
+| `Could not find job-tracker-demo.html` | Copy the file into `Automation/app/` or set `JOB_TRACKER_PATH` |
+| `ModuleNotFoundError: No module named 'conftest'` | The file must be named exactly `conftest.py` (lowercase) and sit in `Automation/`, **not** inside `tests/` |
+| `Executable doesn't exist ... chromium` | Run `python -m playwright install chromium` |
+| `pytest is not recognized` | Use `python -m pytest` and make sure the virtual environment is active |
+| Bug IDs are not shown in the output | Run from the `Automation` folder so that `pytest.ini` is used |
 
 ---
 
@@ -636,17 +348,17 @@ python -m pytest tests\test_job_tracker.py::test_total_budget_matches_sum_of_job
 
 Where the supplied requirements did not explicitly define expected behaviour, reasonable QA assumptions were documented rather than presented as confirmed requirements.
 
-The main assumptions used during testing were:
-
 1. Displayed summary values should accurately reflect the job data displayed by the application.
-2. Invalid financial values should not be accepted as valid job budgets.
-3. A valid job budget is assumed to be greater than zero.
-4. Jobs with a status of `Done` should not continue to be counted as overdue.
-5. User-facing search functionality should normally be case-insensitive.
+2. Invalid financial values (negative amounts) should not be accepted as valid job budgets.
+3. A valid job budget is assumed to be greater than zero (to be confirmed).
+4. Jobs with a status of `Done` should not be counted as overdue.
+5. User-facing search should normally be case-insensitive.
+6. Text typed by a user should be displayed exactly as typed (no HTML interpretation).
+7. A new request should not be saved twice by a double-click.
+8. The absence of Edit and Delete features is an observation (OBS-02), not a defect.
+9. The Overdue figure depends on today's date; expected values in the documents are for 8 October 2026.
 
 Findings based on assumptions may require confirmation from the product owner before being treated as confirmed defects.
-
----
 
 ---
 
@@ -662,11 +374,10 @@ job-request-tracker-qaproject/
 |   `-- test-summary-report.md
 |
 |-- Evidence/
-|   |-- AT-001-create-valid-job-pass.png
-|   |-- AT-002-client-validation-fail.png
-|   |-- AT-003-total-budget-fail.png
-|   |-- BUG-001-after.png
+|   |-- AT-run-1-expected-failures.png
+|   |-- AT-run-2-failure-messages.png
 |   |-- BUG-001-before.png
+|   |-- BUG-001-after.png
 |   |-- BUG-002-client-name-validation.png
 |   |-- BUG-003-negative-budget.png
 |   |-- BUG-004-completed-jobs-overdue.png
@@ -676,18 +387,29 @@ job-request-tracker-qaproject/
 |   |-- BUG-008-mobile-left-view.png
 |   |-- BUG-008-mobile-right-view.png
 |   |-- BUG-008-mobile-view-new-request-view.png
+|   |-- BUG-009-done-filter.png
+|   |-- BUG-010-duplicate-job.png
+|   |-- BUG-011-cancel-still-saves.png
+|   |-- BUG-012-html-rendered.png
+|   |-- BUG-013-zero-budget.png
+|   |-- BUG-014-decimal-budget.png
+|   |-- BUG-015-long-name.png
+|   |-- BUG-016-five-digit-year.png
 |   `-- Job-title-is-required.png
 |
 |-- Automation/
-|   |-- tests/
-|   |   `-- test_job_tracker.py
-|   `-- requirements.txt
+|   |-- conftest.py
+|   |-- pytest.ini
+|   |-- requirements.txt
+|   |-- app/                      (your local copy of the app - NOT committed)
+|   `-- tests/
+|       `-- test_job_tracker.py
 |
 |-- .gitignore
 `-- README.md
 ```
 
-The following local/generated files are intentionally excluded from Git:
+Add these lines to `.gitignore` so that local and confidential files are not committed:
 
 ```text
 .venv/
@@ -695,6 +417,8 @@ The following local/generated files are intentionally excluded from Git:
 __pycache__/
 playwright-report/
 test-results/
+Automation/app/
+*.html
 ```
 
 The supplied challenge HTML and PDF materials are also excluded.
@@ -705,275 +429,82 @@ The supplied challenge HTML and PDF materials are also excluded.
 
 The repository contains four primary QA documents together with supporting test evidence.
 
-## Test Plan
-
-`Docs/test-plan.md`
-
-Defines the overall QA strategy and contains:
-
-- Testing objectives
-- Scope
-- Test approach
-- Test priorities
-- Test environment
-- Entry criteria
-- Exit criteria
-- Assumptions
-- Limitations
-
----
-
-## Test Cases
-
-`Docs/test-cases.md`
-
-Contains the **17 documented manual test cases**, including:
-
-- Test ID
-- Priority
-- Test type
-- Test data
-- Test steps
-- Expected result
-- Actual result
-- Test result
-- Related defect references
-
----
-
-## Bug Report
-
-`Docs/bug-report.md`
-
-Contains the **8 documented defects**, including:
-
-- Bug ID
-- Severity
-- Environment
-- Steps to reproduce
-- Expected result
-- Actual result
-- Severity reasoning
-- Supporting evidence
-
----
-
-## Test Summary Report
-
-`Docs/test-summary-report.md`
-
-Provides the final consolidated QA assessment for the project.
-
-The report contains:
-
-- Executive summary
-- Testing objectives
-- Test scope
-- Test approach
-- Test environment
-- Manual test execution summary
-- Defect summary
-- High-, Medium-, and Low-severity findings
-- Automated testing summary
-- Automated test results
-- Manual and automated evidence references
-- Test traceability
-- QA assumptions
-- Testing limitations
-- Risk assessment
-- Release recommendation
-- Retesting recommendations
-- Final QA conclusion
-
-The Test Summary Report brings together the results of the complete manual and automated testing process and provides the final release assessment for the Job Request Tracker.
-
----
-
-## Evidence
-
-The `Evidence` directory contains screenshots captured during **manual and automated testing** to support the documented findings and test results.
-
-Manual evidence is provided for findings including:
-
-- Incorrect Total Budget
-- Client Name validation spelling
-- Negative budget acceptance
-- Completed jobs included as overdue
-- Incorrect filtered result count
-- Case-sensitive search
-- Clear Filters behaviour
-- Mobile responsiveness
-
-Automated execution evidence is provided for:
-
-- AT-001 - Successful valid job creation
-- AT-002 - Client Name validation defect reproduction
-- AT-003 - Total Budget defect reproduction
+| Document | Contents |
+|---|---|
+| [`Docs/test-plan.md`](Docs/test-plan.md) | Objectives, scope, test approach (control-by-control checklist, test data approach, automation approach), priorities, environment, entry and exit criteria, assumptions |
+| [`Docs/test-cases.md`](Docs/test-cases.md) | The **42 manual test cases** (ID, priority, type, test data, steps, expected and actual results, result, related defect) plus a results overview and the automated coverage table |
+| [`Docs/bug-report.md`](Docs/bug-report.md) | The **16 defects** and 2 observations, each with numbered steps, expected and actual results, severity reason and evidence |
+| [`Docs/test-summary-report.md`](Docs/test-summary-report.md) | Executive summary, defect and automation results, traceability, risks, limitations, release recommendation, retesting guidance and final conclusion |
 
 ---
 
 # Test Traceability Summary
 
-The project maintains traceability between manual testing, identified defects, automated regression checks, and supporting evidence.
-
 | Area | Manual Testing | Defect | Automated Coverage | Evidence |
 |---|---|---|---|---|
-| Valid job creation | Covered | None | AT-001 | AT-001 screenshot |
-| Client Name validation | Covered | BUG-002 | AT-002 | Manual + AT-002 screenshots |
-| Total Budget calculation | Covered | BUG-001 | AT-003 | Manual + AT-003 screenshots |
-| Negative Budget | Covered | BUG-003 | Not automated | Manual evidence |
+| Total Budget calculation | Covered | BUG-001 | AT-001 | Manual + AT-run screenshots |
+| Negative Budget | Covered | BUG-003 | AT-002 | Manual + AT-run screenshots |
+| Status filter (Done option) | Covered | BUG-009 | AT-003 | Manual + AT-run screenshots |
+| Client Name validation message | Covered | BUG-002 | Not automated | Manual evidence |
 | Overdue completed jobs | Covered | BUG-004 | Not automated | Manual evidence |
 | Result count | Covered | BUG-005 | Not automated | Manual evidence |
 | Case-sensitive search | Covered | BUG-006 | Not automated | Manual evidence |
 | Clear Filters | Covered | BUG-007 | Not automated | Manual evidence |
 | Mobile responsiveness | Covered | BUG-008 | Not automated | Manual evidence |
+| Double-click Save | Covered | BUG-010 | Not automated | Manual evidence |
+| Cancel while saving | Covered | BUG-011 | Not automated | Manual evidence |
+| HTML in text fields | Covered | BUG-012 | Not automated | Manual evidence |
+| Zero / decimal budget | Covered | BUG-013, BUG-014 | Not automated | Manual evidence |
+| Long text | Covered | BUG-015 | Not automated | Manual evidence |
+| Due date with a 5-digit year | Covered | BUG-016 | Not automated | Manual evidence |
 
 The automated suite intentionally focuses on selected high-value regression scenarios rather than duplicating the complete manual test suite.
 
 ---
 
----
-
 # Current Project Status
 
-## Completed
+## ✅ Completed
 
 - Test planning
-- Manual functional testing
-- Positive testing
-- Negative testing
-- Boundary testing
-- Exploratory testing
-- Desktop testing
-- Mobile/responsive testing
-- **17 documented manual test cases**
-- **8 documented defects**
+- Manual functional, positive, negative, boundary and exploratory testing
+- Control-by-control checklist applied to every control
+- Desktop and mobile/responsive testing
+- **42 documented manual test cases**
+- **16 documented defects** and 2 observations
 - Manual screenshot evidence
-- Python automation environment
-- pytest setup
-- Playwright setup
-- Chromium installation
-- Automated application smoke test
-- AT-001 valid request automation
-- AT-002 validation automation
-- AT-003 Total Budget automation
+- Python automation environment (pytest, Playwright, Chromium)
+- AT-001, AT-002 and AT-003 automated checks with `xfail` tracking
 - Automated execution evidence
-- Automation dependency management
-- Automation execution documentation
 - Manual and automated QA documentation
 - Test-to-defect traceability
-- Final QA Test Summary Report
-- Risk assessment
-- Release recommendation
-- Retesting recommendations
-- Final repository audit
+- Final QA Test Summary Report with risk assessment, release recommendation and retesting recommendations
+
+## 🔜 Possible next steps
+
+- Automate BUG-010 (double-click Save) and BUG-012 (HTML in text fields)
+- Control the clock so that the date-dependent overdue defects (BUG-004, BUG-016) can be automated
+- Retest everything once the defects are fixed
 
 ## Final Status
 
-The planned QA work for this challenge is **complete**.
-
-The repository contains the manual testing documentation, defect reports, supporting evidence, automated regression tests, automation dependencies, final Test Summary Report, and overall release assessment.
+The planned QA work for this challenge is **complete**. The repository contains the manual testing documentation, defect reports, supporting evidence, automated regression tests, final Test Summary Report, and release recommendation.
 
 ---
 
 # Repository Note
 
-The original Job Request Tracker HTML file supplied for the QA challenge is **not included in this repository**.
+The original Job Request Tracker HTML file supplied for the QA challenge is **not included in this repository**. It is treated as confidential test material and is kept outside the repository.
 
-The supplied application is treated as confidential test material and is kept outside the repository.
-
-The repository contains only the QA work created for the challenge, including:
+The repository contains only the QA work created for the challenge:
 
 - Test Plan
-- 17 manual test cases
-- 8 documented defect reports
-- Manual test evidence
-- Automated test evidence
+- 42 manual test cases
+- 16 documented defect reports and 2 observations
+- Manual and automated test evidence
 - Python/Playwright automated test code
 - Automation dependencies
 - Final QA Test Summary Report
-- Project README and supporting QA documentation
+- Project README
 
-The supplied challenge PDFs and HTML application are excluded through `.gitignore`.
-
-This keeps confidential challenge material separate from the QA deliverables while still allowing authorised testers with a local copy of `Job_traker.html` to execute the automated test suite.
-
----
-
-# Final Release Recommendation
-
-**NOT READY FOR RELEASE**
-
-The application should not be released until the High-severity financial defects have been corrected and successfully retested.
-
-At minimum:
-
-1. **BUG-001** should be fixed so that Total Budget accurately reflects the underlying job budgets.
-2. **BUG-003** should be fixed so that invalid negative budget values cannot be saved.
-3. The affected manual test cases should be rerun.
-4. The complete automated regression suite should be rerun.
-5. AT-002 and AT-003 should be reviewed after their corresponding defects are fixed.
-6. Medium-severity findings should be reviewed against confirmed product requirements before release.
-
-## Findings by Severity
-
-### High Severity
-
-- **BUG-001 - Incorrect Total Budget**
-- **BUG-003 - Negative budget values are accepted**
-
-These defects affect financial-data accuracy and integrity and must be addressed before release.
-
-### Medium Severity
-
-- BUG-004 - Completed jobs counted as overdue
-- BUG-005 - Incorrect filtered result count
-- BUG-006 - Case-sensitive search
-- BUG-007 - Clear Filters does not clear Search
-- BUG-008 - Poor mobile responsiveness
-
-These should be reviewed and prioritised according to confirmed product requirements.
-
-### Low Severity
-
-- BUG-002 - Client Name validation spelling error
-
-Although this does not prevent the validation functionality from working, the user-facing text should be corrected.
-
-The complete final QA assessment is available in:
-
-[`Docs/test-summary-report.md`](Docs/test-summary-report.md)
-
-The complete testing lifecycle and final assessment are documented across `Docs/test-plan.md`, `Docs/test-cases.md`, `Docs/bug-report.md`, and `Docs/test-summary-report.md`. Together with the evidence and automated regression suite, these deliverables provide traceability from test planning and execution through defect identification, automation, risk assessment, and the final release recommendation.
-
----
-
-# Overall QA Conclusion
-
-The Job Request Tracker's core functionality is usable, including creating requests, required-field validation, searching, status filtering, and displaying job information.
-
-Manual testing identified **8 documented defects** across financial calculations, validation, filtering, search behaviour, overdue-job handling, result counts, and responsive design.
-
-The highest-priority findings relate to financial-data integrity:
-
-- **BUG-001:** The Total Budget does not equal the sum of the displayed job budgets.
-- **BUG-003:** Negative budget values can be saved.
-
-A focused automated regression suite was subsequently implemented using **Python, pytest, and Playwright**.
-
-**AT-001** confirms that a valid job request can be created successfully.
-
-**AT-002** automatically reproduces the Client Name validation spelling defect documented as **BUG-002**.
-
-**AT-003** independently reads and calculates the displayed job budgets and reproduces **BUG-001** by demonstrating that the jobs total **R100,300** while the application displays **R87,800**.
-
-The automation currently contains four checks when the setup smoke test is included:
-
-- **2 passing**
-- **2 failing because of known application defects**
-
-The combination of manual exploratory testing and targeted browser automation provides broad behavioural coverage together with repeatable regression checks for important application functionality.
-
-Based on the testing performed, the application is **not ready for release**. The **high-severity financial defects must be addressed and retested before release**. The medium-severity filtering, search, overdue-status, and responsive-design issues should then be reviewed according to product priorities.
-
-Once the identified defects are corrected, the affected manual tests and automated regression tests should be rerun to verify the fixes and check for regressions.
+The supplied challenge PDFs and HTML application are excluded through `.gitignore`. This keeps confidential challenge material separate from the QA deliverables while still allowing an authorised tester with a local copy of `job-tracker-demo.html` to execute the automated tests.
