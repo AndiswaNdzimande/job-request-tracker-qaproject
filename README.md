@@ -1,5 +1,7 @@
 # Job Request Tracker - QA Challenge
 
+> **Start here:** the test plan, test cases and bug log are combined in [Docs/QA-Submission.md](Docs/QA-Submission.md). The separate files in the Docs folder contain the same content plus the test summary report.
+
 ## Project Overview
 
 This repository contains my Quality Assurance testing work for the **Job Request Tracker QA Challenge**.
